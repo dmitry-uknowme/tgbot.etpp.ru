@@ -22,7 +22,7 @@ export class AuthController {
     response: Response & { cookies: { [key: string]: string } },
     @Body() payload: LoginProfilePayload,
   ): Promise<any> {
-    const { chatId, tgId } = payload;
+    const { chat_id, tg_id } = payload;
     const accessToken = sign(payload, process.env.JWT_SECRET_KEY, {
       expiresIn: '30m',
     });
@@ -48,7 +48,11 @@ export class AuthController {
     ) {
       return 'Error! Already logged in';
     }
-    await this.authService.addAuth(chatId, tgId, refreshToken);
+    await this.authService.addAuth({
+      chat_id,
+      tg_id,
+      refresh_token: refreshToken,
+    });
     return { res: request.cookies };
   }
 
@@ -58,8 +62,6 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Body() payload: LoginProfilePayload,
   ): any {
-    const { chatId, tgId, username } = payload;
-
     //@ts-expect-error
     response.clearCookie('refresh_token');
     //@ts-expect-error

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LoginProfilePayload } from './auth.payload';
+import { AddAuthPayload, LoginProfilePayload } from './auth.payload';
 import jwt from 'jsonwebtoken';
 import { Auth } from './auth.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,12 +11,24 @@ export class AuthService {
     @InjectRepository(Auth)
     private authRepository: Repository<Auth>,
   ) {}
-  addAuth(chatId: string, tgId: string, refreshToken: string) {
-    this.authRepository.create({
-      chat_id: chatId,
-      tg_id: tgId,
-      refresh_token: refreshToken,
+  async addAuth(payload: AddAuthPayload) {
+    const { chat_id, tg_id, refresh_token } = payload;
+    console.log('pyload', payload);
+    const authModel = await this.authRepository.create({
+      chat_id,
+      tg_id,
+      refresh_token,
     });
+
+    return await this.authRepository.save(authModel);
+    // console.log(
+    //   'rep',
+    //   this.authRepository.create({
+    //     chat_id,
+    //     tg_id,
+    //     refresh_token,
+    //   }),
+    // );
   }
   // loginProfile(payload: LoginProfilePayload) {
   //   const { chatId, tgId, username } = payload;
