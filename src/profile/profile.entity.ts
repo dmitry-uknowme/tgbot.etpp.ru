@@ -7,25 +7,25 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('Profile')
 export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  tg_profile: any;
+  tg_profile: string;
 
-  @Column()
-  subscribes: { name: string; desctiption: string; created_at: Date }[] | [];
+  // @OneToMany(()=>Subscribe, (subscribe=>subscribe.name));
+  // subscribes: string[]; /* { name: string; desctiption: string; created_at: Date }[] | []; */
 
   @Column()
   current_role: 'ORGANIZER' | 'PARTICIPANT' | null;
 
-  @Column()
-  connected_platforms: {
-    name: 'COMMERCIAL' | 'FZ223' | 'MARKET';
-    profile_id: string;
-  }[];
+  // @Column()
+  // connected_platforms: {
+  //   name: 'COMMERCIAL' | 'FZ223' | 'MARKET';
+  //   profile_id: string;
+  // }[];
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;

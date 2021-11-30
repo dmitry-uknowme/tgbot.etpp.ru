@@ -2,21 +2,23 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class Chat {
+export class Auth {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @Column()
-  // messages: string[];
+  @Column()
+  refresh_token: string;
 
-  // @Column()
-  // members: string[];
+  @Column()
+  tg_id: string;
+
+  @Column()
+  chat_id: string;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;

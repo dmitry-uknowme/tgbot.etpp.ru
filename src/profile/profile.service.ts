@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Profile } from './profile.entity';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @Inject('PROFILE_REPOSITORY')
+    @InjectRepository(Profile)
     private profileRepository: Repository<Profile>,
   ) {}
   getProfiles() {

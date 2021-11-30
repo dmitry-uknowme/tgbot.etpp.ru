@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 import { ConnectionModule } from './connection/connection.module';
 import { ProfileModule } from './profile/profile.module';
 
@@ -8,27 +9,18 @@ import { ProfileModule } from './profile/profile.module';
   imports: [
     ConnectionModule,
     ProfileModule,
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: 'localhost',
-    //   username: 'postgres',
-    //   password: '123',
-    //   database: 'tgbot-etpp',
-    //   // entities: [],
-    //   // synchronize: true,
-    // }),
-    TypeOrmModule.forRoot({
-      type: 'mongodb',
-      host: 'localhost',
-      username: 'postgres',
-      password: '123',
-      database: 'tgbot-etpp',
-      // entities: [],
-      // synchronize: true,
-    }),
+    AuthModule,
     ConfigModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      entities: ['dist/**/*.entity{.ts,.js}'],
+      synchronize: true,
+    }),
   ],
   controllers: [],
-  // providers: [AppService],
 })
 export class AppModule {}

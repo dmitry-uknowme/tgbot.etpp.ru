@@ -17,12 +17,21 @@ export class ConnectionService {
       { command: '/clear', description: 'Очистить клавиатуру' },
     ]);
 
+    // bot.on('message', (msg) => {
+    //   const chatId = msg.chat.id;
+    //   const tgId = msg.from.id;
+    //   console.log('url', `http://localhost:5000/api/auth/login` );
+    //   axios
+    //     .post(`http://localhost:5000/api/auth/login`, { chatId, tgId })
+    //     .then((res) => console.log('res', res.data));
+    // });
+
     bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
       bot.sendMessage(
         chatId,
         // 'Вас приветствует официальный телеграм-бот плошадки ЕТП ТПП. Он создан с целью упрощения работы на площадке',
-        'Здравствуйте Вас приветствует тестовая версия телеграм-бота плошадки ЕТП ТПП, созданнный с целью упрощения работы на площадке',
+        'Здравствуйте Вас приветствует тестовая версия телеграм-бота плошадки ЕТП ТПП, созданнная с целью упрощения работы на площадке',
         {
           reply_markup: {
             inline_keyboard: [
@@ -53,6 +62,7 @@ export class ConnectionService {
           },
         },
       );
+      console.log('payload', msg);
     });
 
     bot.onText(/\/help/, (msg) => {
@@ -133,7 +143,7 @@ export class ConnectionService {
                     customer.short_title || organizer.short_title
                   }\nНачальная цена: ${
                     total_amount_price.amount
-                      ? total_amount_price.amount + ' ₽'
+                      ? total_amount_price.localized
                       : 'Не предусмотрена'
                   }\nСекция: ${
                     platform.type.translate
