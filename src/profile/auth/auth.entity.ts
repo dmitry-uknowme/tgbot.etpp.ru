@@ -8,10 +8,10 @@ import {
 
 @Entity()
 export class Auth {
-  @PrimaryGeneratedColumn()
-  id: number;
+  // @PrimaryGeneratedColumn()
+  // id: number;
 
-  @Column()
+  @Column({ primary: true })
   refresh_token: string;
 
   @Column()
@@ -20,9 +20,9 @@ export class Auth {
   @Column()
   chat_id: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  created_at: Date;
+  // @CreateDateColumn({ name: 'created_at' })
+  // created_at: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updated_at: Date;
+  // @UpdateDateColumn({ name: 'updated_at' })
+  // updated_at: Date;
 }
