@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
 import { ConnectionModule } from './connection/connection.module';
 import { ProfileModule } from './profile/profile.module';
 
@@ -9,7 +8,6 @@ import { ProfileModule } from './profile/profile.module';
   imports: [
     ConnectionModule,
     ProfileModule,
-    AuthModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',

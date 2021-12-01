@@ -1,6 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { parse as parseCookie } from 'set-cookie-parser';
 
 @Injectable()
 export class ConnectionService {
@@ -17,52 +18,114 @@ export class ConnectionService {
       { command: '/clear', description: 'Очистить клавиатуру' },
     ]);
 
-    // bot.on('message', (msg) => {
-    //   const chatId = msg.chat.id;
-    //   const tgId = msg.from.id;
-    //   console.log('url', `http://localhost:5000/api/auth/login` );
-    //   axios
-    //     .post(`http://localhost:5000/api/auth/login`, { chatId, tgId })
-    //     .then((res) => console.log('res', res.data));
-    // });
+    bot.on('message', (msg) => {
+      const chatId = msg.chat.id;
+
+      // console.log('url', `http://localhost:5000/api/auth/login`);
+    });
 
     bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
-      bot.sendMessage(
-        chatId,
-        // 'Вас приветствует официальный телеграм-бот плошадки ЕТП ТПП. Он создан с целью упрощения работы на площадке',
-        'Здравствуйте Вас приветствует тестовая версия телеграм-бота плошадки ЕТП ТПП, созданнная с целью упрощения работы на площадке',
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: 'Активные процедуры',
-                  callback_data: JSON.stringify({
-                    type: 'GET_PROCEDURE_LIST',
-                    payload: { page: 1, limit: 10 },
-                  }),
-                },
-                {
-                  text: 'Ваши подписки',
-                  callback_data: JSON.stringify({
-                    type: 'GET_SUBSCRIPTION_LIST',
-                  }),
-                },
+      // console.log('msg', msg);
+      axios('http://localhost:5000/api/auth/check', {
+        method: 'post',
+        withCredentials: true,
+      }).then((res) => {
+        console.log(
+          'res from check',
+          parseCookie(res, {
+            decodeValues: true,
+          }),
+        );
+        console.log('isvalid', res.data);
+        const isValid = res.data.valid;
+
+        if (isValid) {
+          bot.sendMessage(
+            chatId,
+            decodeURI(
+              'Вы авторизованы\nЗдравствуйте Вас приветствует тестовая версия телеграм-бота плошадки ЕТП ТПП, созданнная с целью упрощения работы на площадке',
+            ),
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: 'Активные процедуры',
+                      callback_data: JSON.stringify({
+                        type: 'GET_PROCEDURE_LIST',
+                        payload: { page: 1, limit: 10 },
+                      }),
+                    },
+                    {
+                      text: 'Ваши подписки',
+                      callback_data: JSON.stringify({
+                        type: 'GET_SUBSCRIPTION_LIST',
+                      }),
+                    },
+                  ],
+                  [
+                    {
+                      text: 'Опубликовать процедуру',
+                      callback_data: JSON.stringify({
+                        type: 'ADD_NEW_PROCEDURE',
+                      }),
+                    },
+                  ],
+                ],
+              },
+            },
+          );
+        } else {
+          bot.sendMessage(chatId, 'Вы не авторизованы', {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: 'Авторизоваться',
+                    callback_data: JSON.stringify({ type: 'AUTHORIZE' }),
+                  },
+                ],
               ],
-              [
-                {
-                  text: 'Опубликовать процедуру',
-                  callback_data: JSON.stringify({
-                    type: 'ADD_NEW_PROCEDURE',
-                  }),
-                },
-              ],
-            ],
-          },
-        },
-      );
-      console.log('payload', msg);
+            },
+          });
+        }
+      });
+      // bot.sendMessage(
+      //   chatId,
+      //   // 'Вас приветствует официальный телеграм-бот плошадки ЕТП ТПП. Он создан с целью упрощения работы на площадке',
+      //   'Здравствуйте Вас приветствует тестовая версия телеграм-бота плошадки ЕТП ТПП, созданнная с целью упрощения работы на площадке',
+      //   {
+      //     reply_markup: {
+      //       inline_keyboard: [
+      //         [
+      //           {
+      //             text: 'Активные процедуры',
+      //             callback_data: JSON.stringify({
+      //               type: 'GET_PROCEDURE_LIST',
+      //               payload: { page: 1, limit: 10 },
+      //             }),
+      //           },
+      //           {
+      //             text: 'Ваши подписки',
+      //             callback_data: JSON.stringify({
+      //               type: 'GET_SUBSCRIPTION_LIST',
+      //             }),
+      //           },
+      //         ],
+      //         [
+      //           {
+      //             text: 'Опубликовать процедуру',
+      //             callback_data: JSON.stringify({
+      //               type: 'ADD_NEW_PROCEDURE',
+      //             }),
+      //           },
+      //         ],
+      //       ],
+      //     },
+      //   },
+      // );
+      // console.log('payload', msg);
     });
 
     bot.onText(/\/help/, (msg) => {
@@ -112,6 +175,7 @@ export class ConnectionService {
       const queryPayload = parsedQueryData.payload;
       const queryType = parsedQueryData.type;
       const chatId = query.message.chat.id;
+      const tgId = query.message.from.id;
       // console.log('query', queryType, queryPayload, query);
 
       switch (queryType) {
@@ -121,6 +185,7 @@ export class ConnectionService {
           console.log('page', page, 'lim', limit);
           const { data } = await axios.get(
             `${process.env.CORE_API_URL}/procedures?page=${page}&limit=${limit}`,
+            { withCredentials: true },
           );
           const procedures = data.data.items;
           const total = data.data.total;
@@ -201,6 +266,7 @@ export class ConnectionService {
           const { chPage, chLimit } = queryPayload;
           const chooseData = await axios.get(
             `${process.env.CORE_API_URL}/procedures?page=${chPage}&limit=${chLimit}`,
+            { withCredentials: true },
           );
           const chooseProceduresBtns = chooseData.data.data.items.map(
             ({ name, number }) => ({
@@ -231,6 +297,54 @@ export class ConnectionService {
               },
             },
           );
+          break;
+        case 'AUTHORIZE':
+          axios
+            .post(
+              `http://localhost:5000/api/auth/login`,
+              {
+                chat_id: chatId,
+                tg_id: tgId,
+              },
+              { withCredentials: true },
+            )
+            .then((res) => {
+              console.log(
+                'res of auth',
+                parseCookie(res, {
+                  decodeValues: true,
+                }),
+              );
+              bot.sendMessage(chatId, 'Вы успешно авторизовались', {
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: 'Активные процедуры',
+                        callback_data: JSON.stringify({
+                          type: 'GET_PROCEDURE_LIST',
+                          payload: { page: 1, limit: 10 },
+                        }),
+                      },
+                      {
+                        text: 'Ваши подписки',
+                        callback_data: JSON.stringify({
+                          type: 'GET_SUBSCRIPTION_LIST',
+                        }),
+                      },
+                    ],
+                    [
+                      {
+                        text: 'Опубликовать процедуру',
+                        callback_data: JSON.stringify({
+                          type: 'ADD_NEW_PROCEDURE',
+                        }),
+                      },
+                    ],
+                  ],
+                },
+              });
+            });
           break;
         default:
       }
